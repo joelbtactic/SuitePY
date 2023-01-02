@@ -2,9 +2,9 @@
 [![readthedocs](https://readthedocs.org/projects/suitepy/badge/?version=latest&style=flat-square)](https://suitepy.readthedocs.io/en/latest/)
 [![GitHub (pre-)release](https://img.shields.io/github/release/sanchezfauste/SuitePY/all.svg?style=flat-square)](https://github.com/sanchezfauste/SuitePY/releases/latest)
 
-# SuitePY
+# SuitePY 
 
-Suite PY is a simple Python client for SuiteCRM API.
+Suite PY is a simple Python client for SuiteCRM API v8.
 
 ## How to prepare the environment on Linux (Debian)
 In this section is described how to get the development environment ready on Debian based systems.
