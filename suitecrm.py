@@ -22,11 +22,11 @@ import requests
 import hashlib
 import json
 from collections import OrderedDict
-from suite_exceptions import *
-from bean import Bean
-from bean_exceptions import *
-from config import Config
-from singleton import Singleton
+from .suite_exceptions import *
+from .bean import Bean
+from .bean_exceptions import *
+from .config import Config
+from .singleton import Singleton
 
 
 class SuiteCRM(Singleton):
@@ -48,7 +48,11 @@ class SuiteCRM(Singleton):
             'response_type': 'JSON',
             'rest_data': json.dumps(parameters),
         }
-        r = requests.post(self.conf.url, data=data, verify=self.conf.verify_ssl)
+        r = requests.post(
+            self.conf.url,
+            data=data,
+            verify=self.conf.verify_ssl
+        )
         r.raise_for_status()
         response = json.loads(r.text, object_pairs_hook=OrderedDict)
         if self._call_failed(response):
@@ -79,14 +83,14 @@ class SuiteCRM(Singleton):
         self._session_id = login_result['id']
 
     @staticmethod
-    def _md5(input):
-        return hashlib.md5(input.encode('utf8')).hexdigest()
+    def _md5(text):
+        return hashlib.md5(text.encode('utf8')).hexdigest()
 
     @staticmethod
     def _get_bean_failed(result):
         try:
             return result['entry_list'][0]['name_value_list'][0]['name'] == 'warning'
-        except:
+        except Exception:
             return False
 
     def get_bean(self, module_name, id, select_fields='',
@@ -120,7 +124,8 @@ class SuiteCRM(Singleton):
         return Bean(
             module_name,
             result['entry_list'][0]['name_value_list'],
-            result['relationship_list'][0] if len(result['relationship_list']) > 0 else []
+            result['relationship_list'][0] if len(
+                result['relationship_list']) > 0 else []
         )
 
     def save_bean(self, bean):
@@ -183,7 +188,7 @@ class SuiteCRM(Singleton):
         try:
             if int(result['next_offset']) < int(result['total_count']):
                 next_offset = result['next_offset']
-        except:
+        except Exception:
             pass
         return {
             "result_count": result['result_count'],
@@ -228,8 +233,8 @@ class SuiteCRM(Singleton):
         return result
 
     def get_relationships(self, module_name, module_id, link_field_name,
-                          related_module_query='', related_fields=[],
-                          related_module_link_name_to_fields_array=[], deleted=False,
+                          related_module_query='', related_fields=None,
+                          related_module_link_name_to_fields_array=None, deleted=False,
                           order_by='', offset='', limit=''):
         """
         Retrieve a collection of beans that are related to the specified bean
@@ -258,8 +263,9 @@ class SuiteCRM(Singleton):
         parameters['module_id'] = module_id
         parameters['link_field_name'] = link_field_name
         parameters['related_module_query'] = related_module_query
-        parameters['related_fields'] = related_fields
-        parameters['related_module_link_name_to_fields_array'] = related_module_link_name_to_fields_array
+        parameters['related_fields'] = related_fields or []
+        parameters['related_module_link_name_to_fields_array'] = \
+            related_module_link_name_to_fields_array or []
         parameters['deleted'] = deleted
         parameters['order_by'] = order_by
         parameters['offset'] = offset
@@ -271,7 +277,8 @@ class SuiteCRM(Singleton):
                 Bean(
                     entry['module_name'],
                     entry['name_value_list'],
-                    result['relationship_list'][i] if len(result['relationship_list']) > i else []
+                    result['relationship_list'][i] if len(
+                        result['relationship_list']) > i else []
                 )
             )
         previous_offset = None
@@ -294,7 +301,7 @@ class SuiteCRM(Singleton):
         }
 
     def set_relationship(self, module_name, module_id, link_field_name,
-                         related_ids, name_value_list=[], delete=False):
+                         related_ids, name_value_list=None, delete=False):
         """
         Set a single relationship between two beans. The items are related by module name and id.
 
@@ -316,7 +323,7 @@ class SuiteCRM(Singleton):
         parameters['module_id'] = module_id
         parameters['link_field_name'] = link_field_name
         parameters['related_ids'] = related_ids
-        parameters['name_value_list'] = name_value_list
+        parameters['name_value_list'] = name_value_list or []
         parameters['delete'] = delete
         return self._request('set_relationship', parameters)
 
@@ -357,7 +364,7 @@ class SuiteCRM(Singleton):
     def get_pdf_template(self, template_id, bean_module, bean_id):
         """
         Retrieve PDF Template for a given module record.
-        
+
         :param str template_id: template ID used to generate PDF.
         :param str bean_module: module name of the bean that will be used to populate PDF.
         :param str bean_id: ID of the bean record.
