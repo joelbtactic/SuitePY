@@ -18,15 +18,22 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #######################################################################
 
-import requests
 import hashlib
 import json
 from collections import OrderedDict
-from .suite_exceptions import *
-from .bean import Bean
-from .bean_exceptions import *
-from .config import Config
-from .singleton import Singleton
+from urllib.parse import quote
+from oauthlib.oauth2 import BackendApplicationClient, TokenExpiredError, InvalidClientError
+from oauthlib.oauth2.rfc6749.errors import CustomOAuth2Error
+from requests_oauthlib import OAuth2Session
+import requests
+from suite_exceptions import *
+from bean import Bean
+from bean_exceptions import *
+from config import Config
+from singleton import Singleton
+
+
+
 
 
 class SuiteCRM(Singleton):
@@ -35,56 +42,108 @@ class SuiteCRM(Singleton):
     """
 
     conf = Config()
-    _session_id = None
+
+    TOKEN_URL = '/legacy/Api/access_token'
+    MODULE_URL = '/legacy/Api/V8/module'
+
+    def get_token(self):
+        return self._access_token
 
     def __init__(self):
-        if not self._session_id:
-            self._login()
+        self._access_token = ''
+        self._headers = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' \
+                        '(KHTML, like Gecko) Chrome/97.0.4692.99 Safari/537.36'
+        self._login()
 
-    def _call(self, method, parameters):
-        data = {
-            'method': method,
-            'input_type': 'JSON',
-            'response_type': 'JSON',
-            'rest_data': json.dumps(parameters),
-        }
-        r = requests.post(
-            self.conf.url,
-            data=data,
-            verify=self.conf.verify_ssl
-        )
-        r.raise_for_status()
-        response = json.loads(r.text, object_pairs_hook=OrderedDict)
-        if self._call_failed(response):
-            raise SuiteException.get_suite_exception(response)
-        return response
-
-    def _request(self, method, parameters):
+    def _call(self, the_method, parameters, url, data):
         try:
-            return self._call(method, parameters)
-        except InvalidSessionIDException:
-            self._login()
-            parameters['session'] = self._session_id
-            return self._call(method, parameters)
+            if parameters == '':
+                data = the_method(url)
+            else:
+                data = the_method(url, data=data)
+        except TokenExpiredError:
+            self._refresh_token()
+            if parameters == '':
+                data = the_method(url)
+            else:
+                data = the_method(url, data=data)
+        return data
 
-    @staticmethod
-    def _call_failed(result):
-        return not result or (len(result) == 3 and 'name' in result
-                              and 'description' in result and 'number' in result)
+    def _request(self, url: str, method, parameters=''):
+        """
+        Makes a request to the given url with a specific method and data. If the request fails because the token expired
+        the session will re-authenticate and attempt the request again with a new token.
+        :param url: (string) The url
+        :param method: (string) Get, Post, Patch, Delete
+        :param parameters: (dictionary) Data to be posted
+        :return: (dictionary) Data
+        """
+        url = quote(url, safe='/:?=&')
+        data = json.dumps({"data": parameters})
+        try:
+            the_method = getattr(self.OAuth2Session, method)
+        except AttributeError:
+            return
+        data = self._call(the_method, parameters, url, data)
+
+        if data.status_code == 401:
+            data = self._revoke_token(the_method, parameters, url, data)
+
+        # Database Failure
+        # SuiteCRM does not allow to query by a custom field see README, #Limitations
+        if data.status_code == 400 and 'Database failure.' in data.content.decode():
+            raise Exception(data.content.decode())
+
+        return json.loads(data.content)
+            
+    def _revoke_token(self, the_method, parameters, url, data):
+        attempts = 0
+        while attempts < 1:
+            self._refresh_token()
+            self._call(the_method, parameters, url, data)
+            attempts += 1
+        if data.status_code == 401:
+            exit('401 (Unauthorized) client id/secret has been revoked, new token was attempted and failed.')
+        
+        return data
+
 
     def _login(self):
-        login_parameters = OrderedDict()
-        login_parameters['user_auth'] = {
-            'user_name': self.conf.username,
-            'password': self._md5(self.conf.password)
-        }
-        login_parameters['application_name'] = self.conf.application_name
-        login_result = self._call('login', login_parameters)
-        self._session_id = login_result['id']
+        """
+        Checks to see if a Oauth2 Session exists,
+        if not builds a session and retrieves the token from the config file,
+        if no token in config file, fetch a new one.
+        :return: None
+        """
+        # Does session exist?
+        if not hasattr(self, 'OAuth2Session'):
+            client = BackendApplicationClient(client_id=self.conf.client_id)
+            self.OAuth2Session = OAuth2Session(client=client,
+                                               client_id=self.conf.client_id)
+            self.OAuth2Session.headers.update({"User-Agent": self._headers,
+                                               'Content-Type': 'application/json'})
+            if self._access_token == '':
+                self._refresh_token()
+            else:
+                self.OAuth2Session.token = self._access_token
+        else:
+            self._refresh_token()
 
-    @staticmethod
-    def _md5(text):
-        return hashlib.md5(text.encode('utf8')).hexdigest()
+    def _refresh_token(self) -> None:
+        """
+        Fetch a new token from from token access url, specified in config file.
+        :return: None
+        """
+        try:
+            self.OAuth2Session.fetch_token(token_url=self.conf.url + self.TOKEN_URL,
+                                           client_id=self.conf.client_id,
+                                           client_secret=self.conf.client_secret)
+        except InvalidClientError:
+            exit('401 (Unauthorized) - client id/secret')
+        except CustomOAuth2Error:
+            exit('401 (Unauthorized) - client id')
+        # Update configuration file with new token'
+        self._access_token = str(self.OAuth2Session.token)
 
     @staticmethod
     def _get_bean_failed(result):
@@ -92,6 +151,10 @@ class SuiteCRM(Singleton):
             return result['entry_list'][0]['name_value_list'][0]['name'] == 'warning'
         except Exception:
             return False
+
+    def get_modules(self):
+        url = '/legacy/Api/V8/meta/modules'
+        return self._request(f'{self.conf.url}{url}', 'get')
 
     def get_bean(self, module_name, id, select_fields='',
                  link_name_to_fields_array='', track_view=''):

@@ -53,8 +53,8 @@ class Config:
         config = configparser.ConfigParser()
         config.read(config_file)
         self._url = config.get("SuiteCRM API Credentials", "url")
-        self._username = config.get("SuiteCRM API Credentials", "username")
-        self._password = config.get("SuiteCRM API Credentials", "password")
+        self._client_id = config.get("SuiteCRM API Credentials", "client_id")
+        self._client_secret = config.get("SuiteCRM API Credentials", "client_secret")
         self._application_name = config.get(
             "SuiteCRM API Credentials",
             "application_name"
@@ -70,10 +70,10 @@ class Config:
         config.set(
             "SuiteCRM API Credentials",
             "url",
-            "https://example.org/service/v4_1/rest.php"
+            "https://crm.example.org"
         )
-        config.set("SuiteCRM API Credentials", "username", "api")
-        config.set("SuiteCRM API Credentials", "password", "123456")
+        config.set("SuiteCRM API Credentials", "client_id", "client_id")
+        config.set("SuiteCRM API Credentials", "client_secret", "client_secret")
         config.set("SuiteCRM API Credentials", "application_name", "SuitePY")
         config.set("SuiteCRM API Credentials", "verify_ssl", True)
         config.write(config_file)
@@ -82,32 +82,32 @@ class Config:
     @property
     def url(self):
         """
-        Get SuiteCRM REST API URL.
+        Get SuiteCRM API URL.
 
-        :return: SuiteCRM REST API URL
+        :return: SuiteCRM API URL
         :rtype: str
         """
         return self._url
 
     @property
-    def username(self):
+    def client_id(self):
         """
-        Get login username.
+        Get client id.
 
-        :return: login username.
+        :return: client id.
         :rtype: str
         """
-        return self._username
+        return self._client_id
 
     @property
-    def password(self):
+    def client_secret(self):
         """
-        Get login password.
+        Get client secret.
 
-        :return: login password.
+        :return: client secret.
         :rtype: str
         """
-        return self._password
+        return self._client_secret
 
     @property
     def application_name(self):
