@@ -32,10 +32,6 @@ from bean_exceptions import *
 from config import Config
 from singleton import Singleton
 
-
-
-
-
 class SuiteCRM(Singleton):
     """
     This class contains methods to interact with a SuiteCRM instance.
@@ -43,8 +39,13 @@ class SuiteCRM(Singleton):
 
     conf = Config()
 
+    # The follwing URLs is for the SuiteCRM 8.X versions
     TOKEN_URL = '/legacy/Api/access_token'
     MODULE_URL = '/legacy/Api/V8/module'
+
+    # The follwing URLs is for the SuiteCRM 7.X versions
+    # TOKEN_URL = '/Api/access_token'
+    # MODULE_URL = '/Api/V8/module'
 
     def get_token(self):
         return self._access_token
@@ -88,6 +89,9 @@ class SuiteCRM(Singleton):
 
         if data.status_code == 401:
             data = self._revoke_token(the_method, parameters, url, data)
+
+        if data.status_code == 400:
+            exit('400 (BAD REQUEST)')
 
         # Database Failure
         # SuiteCRM does not allow to query by a custom field see README, #Limitations
@@ -155,6 +159,41 @@ class SuiteCRM(Singleton):
     def get_modules(self):
         url = '/legacy/Api/V8/meta/modules'
         return self._request(f'{self.conf.url}{url}', 'get')
+
+
+    def get_bean_v8(self, module_name, id, fields=None):
+        """
+        Gets records given a specific id or filters, can be sorted only once, and the fields returned for each record
+        can be specified.
+        :param module_name: The name of the module
+        :param id: The id of the record
+        :param fields: (list) A list of fields you want to be returned from each record.
+        :return: (list) A list of dictionaries, where each dictionary is a record.
+        """
+        # Fields Constructor
+        if fields:
+            fields = f'?fields[{module_name}]=' + ','.join(fields)
+            url = f'/{module_name}/{id}{fields}'
+        else:
+            url = f'/{module_name}/{id}'
+
+        # Execute
+        response =  self._request(f'{self.conf.url}{self.MODULE_URL}{url}', 'get')['data']
+        bean = Bean(module_name,response['attributes'])
+        print(bean)
+        return
+
+
+    def get_relationships_v8(self, module_name, id: str, related_module_name: str)-> dict:
+        """
+        returns the relationship between this record and another module.
+        :param module_name: name of the module
+        :param id: (string) id of the current module record.
+        :param related_module_name: (string) the module name you want to search relationships for, ie. Contacts.
+        :return: (dictionary) A list of relationships that this module's record contains with the related module.
+        """
+        url = f'/{module_name}/{id}/relationships/{related_module_name.lower()}'
+        return self._request(f'{self.conf.url}{self.MODULE_URL}{url}', 'get')
 
     def get_bean(self, module_name, id, select_fields='',
                  link_name_to_fields_array='', track_view=''):

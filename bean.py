@@ -29,13 +29,13 @@ class Bean(object):
         self._fields = {}
         if name_value_list:
             self._set_name_value_list(name_value_list)
-        self._relationship_list = {}
-        if relationship_list:
-            self._set_relationship_list(relationship_list)
+        # self._relationship_list = {}
+        # # if relationship_list:
+        # #     self._set_relationship_list(relationship_list)
 
     def _set_name_value_list(self, name_value_list):
-        for value in name_value_list.values():
-            self._fields[value['name']] = value['value']
+        for key, value in name_value_list.items():
+            self._fields[key] = value
 
     def _set_relationship_list(self, relationship_list):
         for relationship in relationship_list:
@@ -108,3 +108,19 @@ class Bean(object):
                 for key, value in record.items():
                     print('\t\t', key, ':', value)
                 print('\t\t---- ---- ---- ---- ---- ---- ---- ----')
+
+
+
+    # def _set_name_value_list(self, name_value_list):
+    #     for value in name_value_list.values():
+    #         self._fields[value['name']] = value['value']
+
+    # def _set_relationship_list(self, relationship_list):
+    #     for relationship in relationship_list:
+    #         records = []
+    #         for record in relationship['records']:
+    #             record_map = {}
+    #             for key, value in record.items():
+    #                 record_map[key] = value['value']
+    #             records.append(record_map)
+    #         self._relationship_list[relationship['name']] = records
