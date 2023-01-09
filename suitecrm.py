@@ -43,7 +43,7 @@ class SuiteCRM(Singleton):
     TOKEN_URL = '/legacy/Api/access_token'
     MODULE_URL = '/legacy/Api/V8/module'
 
-    # The follwing URLs is for the SuiteCRM 7.X versions
+    # The following URLs is for the SuiteCRM 7.X versions
     # TOKEN_URL = '/Api/access_token'
     # MODULE_URL = '/Api/V8/module'
 
@@ -181,10 +181,39 @@ class SuiteCRM(Singleton):
         response =  self._request(f'{self.conf.url}{self.MODULE_URL}{url}', 'get')['data']
         bean = Bean(module_name,response['attributes'])
         print(bean)
-        return
+        return response
+
+    def get_bean_list_v8(self, module_name, fields=None, filter=None, pagination=None, sort=None):
+        connectors = ["?", "&"]
+        connectors_idx = 0
+        url = f'{self.conf.url}{self.MODULE_URL}/{module_name}'
+
+        # Fields Constructor
+        if fields:
+            url += f'{connectors[connectors_idx]}fields[{module_name}]=' + ','.join(fields)
+            connectors_idx = 1
+
+        if pagination:
+            if pagination.page_number != None:
+                url += "{0}page[number]={1}&page[size]={2}".format(connectors[connectors_idx], pagination.page_number.lower, pagination.page_size)
+            else:
+                url += "{0}page[size]={1}".format(connectors[connectors_idx], pagination.page_size)
+            connectors_idx = 1
+        
+        if sort:
+            url += f'{connectors[connectors_idx]}sort=-{sort}'
+            connectors_idx = 1
 
 
-    def get_relationships_v8(self, module_name, id: str, related_module_name: str)-> dict:
+        if filter:
+            url += "{0}{1}".format(connectors[connectors_idx], filter.to_filter_string())
+            connectors_idx = 1
+
+        response = self._request(f'{url}', 'get')['data']
+        return response
+
+
+    def get_relationships_v8(self, module_name, id: str, related_module_name: str, fields = None)-> dict:
         """
         returns the relationship between this record and another module.
         :param module_name: name of the module
@@ -192,7 +221,13 @@ class SuiteCRM(Singleton):
         :param related_module_name: (string) the module name you want to search relationships for, ie. Contacts.
         :return: (dictionary) A list of relationships that this module's record contains with the related module.
         """
+        # Fields Constructor
+        seperator = ''
+        if fields:
+            # url =  "{0}?fields[{1}]={2}".format(url, module_name, seperator.join(fields))
+            field =  "?fields={0}".format(seperator.join(fields))
         url = f'/{module_name}/{id}/relationships/{related_module_name.lower()}'
+        print(url)
         return self._request(f'{self.conf.url}{self.MODULE_URL}{url}', 'get')
 
     def get_bean(self, module_name, id, select_fields='',
