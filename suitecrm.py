@@ -161,6 +161,9 @@ class SuiteCRM(Singleton):
         url = '/legacy/Api/V8/meta/modules'
         return self._request(f'{self.conf.url}{url}', 'get')
 
+    def get_module_fields_v8(self, module_name):
+        url = f'/legacy/Api/V8/meta/fields/{module_name}'
+        return self._request(f'{self.conf.url}{url}', 'get')
 
     def get_bean_v8(self, module_name, id, fields=None):
         """
