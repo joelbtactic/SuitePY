@@ -19,6 +19,7 @@
 #######################################################################
 
 import hashlib
+import uuid
 import json
 from collections import OrderedDict
 from urllib.parse import quote
@@ -180,8 +181,8 @@ class SuiteCRM(Singleton):
         # Execute
         response =  self._request(f'{self.conf.url}{self.MODULE_URL}{url}', 'get')['data']
         bean = Bean(module_name,response['attributes'])
-        print(bean)
-        return response
+        # print(response)
+        return bean
 
     def get_bean_list_v8(self, module_name, fields=None, filter=None, pagination=None, sort=None):
         connectors = ["?", "&"]
@@ -222,13 +223,19 @@ class SuiteCRM(Singleton):
         :return: (dictionary) A list of relationships that this module's record contains with the related module.
         """
         # Fields Constructor
-        seperator = ''
-        if fields:
-            # url =  "{0}?fields[{1}]={2}".format(url, module_name, seperator.join(fields))
-            field =  "?fields={0}".format(seperator.join(fields))
+        # seperator = ''
+        # if fields:
+        #     url =  "{0}?fields[{1}]={2}".format(url, module_name, seperator.join(fields))
+        #     field =  "?fields={0}".format(seperator.join(fields))
         url = f'/{module_name}/{id}/relationships/{related_module_name.lower()}'
         print(url)
         return self._request(f'{self.conf.url}{self.MODULE_URL}{url}', 'get')
+
+    def save_bean_v8(self, bean:Bean):
+        attributes = bean.get_bean_fields()
+        module = bean.module
+        data = {'type': module, 'id': str(uuid.uuid4()), 'attributes': attributes}
+        return self._request(f'{self.conf.url}{self.MODULE_URL}', 'post', data)
 
     def get_bean(self, module_name, id, select_fields='',
                  link_name_to_fields_array='', track_view=''):

@@ -29,9 +29,9 @@ class Bean(object):
         self._fields = {}
         if name_value_list:
             self._set_name_value_list(name_value_list)
-        # self._relationship_list = {}
-        # # if relationship_list:
-        # #     self._set_relationship_list(relationship_list)
+        self._relationship_list = {}
+        if relationship_list:
+            self._set_relationship_list(relationship_list)
 
     def _set_name_value_list(self, name_value_list):
         for key, value in name_value_list.items():
@@ -57,6 +57,10 @@ class Bean(object):
 
     def __setitem__(self, field_name, value):
         self._fields[field_name] = value
+
+    def get_bean_fields(self) -> dict:
+        return self._fields
+
 
     @property
     def name_value_list(self):
