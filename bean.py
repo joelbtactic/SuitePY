@@ -38,14 +38,14 @@ class Bean(object):
             self._fields[key] = value
 
     def _set_relationship_list(self, relationship_list):
-        for relationship in relationship_list:
+        for key, value in relationship_list.items():
             records = []
-            for record in relationship['records']:
+            for record in value:
                 record_map = {}
-                for key, value in record.items():
-                    record_map[key] = value['value']
+                for key_atribute, attribute_value in record['attributes'].items():
+                    record_map[key_atribute] = attribute_value
                 records.append(record_map)
-            self._relationship_list[relationship['name']] = records
+            self._relationship_list[key] = records
 
     def __getitem__(self, field_name):
         if field_name in self._fields:
