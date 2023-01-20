@@ -183,9 +183,22 @@ class SuiteCRM(Singleton):
 
         # Execute
         response =  self._request(f'{self.conf.url}{self.MODULE_URL}{url}', 'get')['data']
-        bean = Bean(module_name,response['attributes'])
+        list_relationship = self._get_bean_relationships(response['relationships'], module_name, id)
+        bean = Bean(module_name,response['attributes'], list_relationship)
         # print(response)
         return bean
+
+    def _get_bean_relationships(self, relationships, module_name, id):
+        list_module_relationships = []
+        list_relationships = {}
+        for key, value in relationships.items():
+            if "SecurityGroups" != key:
+                list_module_relationships.append(value['links']['related'].split('/')[-1])
+        for module_relation in list_module_relationships:
+            data = self.get_relationships_v8(module_name, id, module_relation, True)
+            if data['data'] != []:
+                list_relationships[str(data['data'][0]['type'])] = data['data']
+        return list_relationships
 
     def get_bean_list_v8(self, module_name, fields=None, filter=None, pagination=None, sort=None):
         connectors = ["?", "&"]
@@ -217,7 +230,7 @@ class SuiteCRM(Singleton):
         return response
 
 
-    def get_relationships_v8(self, module_name, id: str, related_module_name: str, fields = None)-> dict:
+    def get_relationships_v8(self, module_name, id: str, related_module_name: str, only_relationship_fields: bool = False) -> dict:
         """
         returns the relationship between this record and another module.
         :param module_name: name of the module
@@ -231,6 +244,10 @@ class SuiteCRM(Singleton):
         #     url =  "{0}?fields[{1}]={2}".format(url, module_name, seperator.join(fields))
         #     field =  "?fields={0}".format(seperator.join(fields))
         url = f'/{module_name}/{id}/relationships/{related_module_name.lower()}'
+
+        if only_relationship_fields:
+            return self._request(f'{self.conf.url}{self.MODULE_URL}{url}', 'get')
+
         print(url)
         return self._request(f'{self.conf.url}{self.MODULE_URL}{url}', 'get')
 
