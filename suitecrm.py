@@ -244,12 +244,16 @@ class SuiteCRM(Singleton):
         #     url =  "{0}?fields[{1}]={2}".format(url, module_name, seperator.join(fields))
         #     field =  "?fields={0}".format(seperator.join(fields))
         url = f'/{module_name}/{id}/relationships/{related_module_name.lower()}'
+        response = self._request(f'{self.conf.url}{self.MODULE_URL}{url}', 'get')
 
         if only_relationship_fields:
-            return self._request(f'{self.conf.url}{self.MODULE_URL}{url}', 'get')
+            return response
 
+        bean_list = []
         print(url)
-        return self._request(f'{self.conf.url}{self.MODULE_URL}{url}', 'get')
+        for value in response['data']:
+            bean_list.append(self.get_bean_v8(value['type'], value['id']))
+        return bean_list
 
     def save_bean_v8(self, bean:Bean):
         attributes = bean.get_bean_fields()
