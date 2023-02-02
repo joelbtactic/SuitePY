@@ -165,13 +165,14 @@ class SuiteCRM(Singleton):
         url = f'/legacy/Api/V8/meta/fields/{module_name}'
         return self._request(f'{self.conf.url}{url}', 'get')
 
-    def get_bean_v8(self, module_name, id, fields=None):
+    def get_bean_v8(self, module_name, id, fields=None, link_name_to_fields_array=''):
         """
         Gets records given a specific id or filters, can be sorted only once, and the fields returned for each record
         can be specified.
         :param module_name: The name of the module
         :param id: The id of the record
         :param fields: (list) A list of fields you want to be returned from each record.
+        :param link_name_to_fields_array: a list of link_names and for each link_name.
         :return: (list) A list of dictionaries, where each dictionary is a record.
         """
         # Fields Constructor
@@ -181,11 +182,11 @@ class SuiteCRM(Singleton):
         else:
             url = f'/{module_name}/{id}'
 
-        list_relationship = {}
+        list_relationship = None
         # Execute
         response =  self._request(f'{self.conf.url}{self.MODULE_URL}{url}', 'get')['data']
-        if len(response['relationships']) > 0:
-            list_relationship = self._get_bean_relationships(response['relationships'], module_name, id)
+        if link_name_to_fields_array != '':
+            list_relationship = self._get_bean_relationships(link_name_to_fields_array, module_name, id)
         bean = Bean(module_name,response['attributes'], list_relationship)
         # print(response)
         return bean
@@ -193,9 +194,8 @@ class SuiteCRM(Singleton):
     def _get_bean_relationships(self, relationships, module_name, id):
         list_module_relationships = []
         list_relationships = {}
-        for key, value in relationships.items():
-            if "SecurityGroups" != key:
-                list_module_relationships.append(value['links']['related'].split('/')[-1])
+        for items in relationships:
+            list_module_relationships.append(items['name'])
         for module_relation in list_module_relationships:
             data = self.get_relationships_v8(module_name, id, module_relation, True)
             if data['data'] != []:
