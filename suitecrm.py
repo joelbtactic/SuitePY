@@ -40,11 +40,11 @@ class SuiteCRM(Singleton):
 
     conf = Config()
 
-    # The follwing URLs is for the SuiteCRM 8.X versions
+    # The follwing URLs are for the SuiteCRM 8.X versions
     TOKEN_URL = '/legacy/Api/access_token'
     MODULE_URL = '/legacy/Api/V8/module'
 
-    # The following URLs is for the SuiteCRM 7.X versions
+    # The following URLs are for the SuiteCRM 7.X versions
     # TOKEN_URL = '/Api/access_token'
     # MODULE_URL = '/Api/V8/module'
 
@@ -241,11 +241,6 @@ class SuiteCRM(Singleton):
         :param fields: (list) A list of fields you want to be returned from each related record.
         :return: (dictionary) A list of relationships that this module's record contains with the related module.
         """
-        # Fields Constructor
-        # seperator = ''
-        # if fields:
-        #     url =  "{0}?fields[{1}]={2}".format(url, module_name, seperator.join(fields))
-        #     field =  "?fields={0}".format(seperator.join(fields))
         url = f'/{module_name}/{id}/relationships/{related_module_name.lower()}'
         response = self._request(f'{self.conf.url}{self.MODULE_URL}{url}', 'get')
 
