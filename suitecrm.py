@@ -231,13 +231,14 @@ class SuiteCRM(Singleton):
         response = self._request(f'{url}', 'get')['data']
         return response
 
-
-    def get_relationships_v8(self, module_name, id: str, related_module_name: str, only_relationship_fields: bool = False) -> dict:
+    def get_relationships_v8(self, module_name, id: str, related_module_name: str, only_relationship_fields: bool = False, link_name_to_fields_array='', fields=None) -> dict:
         """
         returns the relationship between this record and another module.
         :param module_name: name of the module
         :param id: (string) id of the current module record.
         :param related_module_name: (string) the module name you want to search relationships for, ie. Contacts.
+        :param link_name_to_fields_array: a list of link_names and for each link_name.
+        :param fields: (list) A list of fields you want to be returned from each related record.
         :return: (dictionary) A list of relationships that this module's record contains with the related module.
         """
         # Fields Constructor
@@ -254,8 +255,11 @@ class SuiteCRM(Singleton):
         bean_list = []
         print(url)
         for value in response['data']:
-            bean_list.append(self.get_bean_v8(value['type'], value['id']))
-        return bean_list
+            bean_list.append(self.get_bean_v8(value['type'], value['id'], link_name_to_fields_array=link_name_to_fields_array, fields=fields))
+        return {
+            "entry_list": bean_list,
+            "result_count": len(bean_list),
+        }
 
     def save_bean_v8(self, bean:Bean):
         attributes = bean.get_bean_fields()
