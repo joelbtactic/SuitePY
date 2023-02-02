@@ -181,9 +181,11 @@ class SuiteCRM(Singleton):
         else:
             url = f'/{module_name}/{id}'
 
+        list_relationship = {}
         # Execute
         response =  self._request(f'{self.conf.url}{self.MODULE_URL}{url}', 'get')['data']
-        list_relationship = self._get_bean_relationships(response['relationships'], module_name, id)
+        if len(response['relationships']) > 0:
+            list_relationship = self._get_bean_relationships(response['relationships'], module_name, id)
         bean = Bean(module_name,response['attributes'], list_relationship)
         # print(response)
         return bean
