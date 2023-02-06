@@ -214,7 +214,7 @@ class SuiteCRM(Singleton):
 
         if pagination:
             if pagination.page_number != None:
-                url += "{0}page[number]={1}&page[size]={2}".format(connectors[connectors_idx], pagination.page_number.lower, pagination.page_size)
+                url += "{0}page[number]={1}&page[size]={2}".format(connectors[connectors_idx], pagination.page_number, pagination.page_size)
             else:
                 url += "{0}page[size]={1}".format(connectors[connectors_idx], pagination.page_size)
             connectors_idx = 1
