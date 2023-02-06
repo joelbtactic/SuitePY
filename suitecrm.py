@@ -262,6 +262,36 @@ class SuiteCRM(Singleton):
         data = {'type': module, 'id': str(uuid.uuid4()), 'attributes': attributes}
         return self._request(f'{self.conf.url}{self.MODULE_URL}', 'post', data)
 
+    def set_relationship_v8(self, module_name, module_id, related_names, related_ids, delete=False):
+        """
+        Creates a relationship between 2 records.
+        :param module_name: name of the module
+        :param module_id: (string) id of the current module record.
+        :param related_names: the modules names of the records you want to create a relationships,
+               ie. Contacts.
+        :param related_ids: ids of the records inside of the other module.
+        :return: (list) A list with the responses of the relationships created/deleted.
+        """
+        if delete:
+            return self._delete_relationship(module_name, module_id, related_names, related_ids)
+        return self._create_relationship(module_name, module_id, related_names, related_ids)
+
+    def _create_relationship(self, module_name, module_id, related_module_names, related_ids):
+        # Post
+        response = []
+        url = f'/{module_name}/{module_id}/relationships'
+        for related_module_name, related_id in zip(related_module_names, related_ids):
+            data = {'type': related_module_name.capitalize(), 'id': related_id}
+            response.append(self._request(f'{self.conf.url}{self.MODULE_URL}{url}', 'post', data))
+        return response
+
+    def _delete_relationship(self, module_name, module_id, related_module_names, related_ids):
+        response = []
+        for related_module_name, related_id in zip(related_module_names, related_ids):
+            url = f'/{module_name}/{module_id}/relationships/{related_module_name.lower()}/{related_id}'
+            response.append(self._request(f'{self.conf.url}{self.MODULE_URL}{url}', 'delete'))
+        return response
+
     def get_bean(self, module_name, id, select_fields='',
                  link_name_to_fields_array='', track_view=''):
         """
