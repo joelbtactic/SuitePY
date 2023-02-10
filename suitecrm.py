@@ -71,13 +71,14 @@ class SuiteCRM(Singleton):
                 data = the_method(url, data=data)
         return data
 
-    def _request(self, url: str, method, parameters=''):
+    def _request(self, url: str, method, parameters='', custom_parameters=''):
         """
         Makes a request to the given url with a specific method and data. If the request fails because the token expired
         the session will re-authenticate and attempt the request again with a new token.
         :param url: (string) The url
         :param method: (string) Get, Post, Patch, Delete
         :param parameters: (dictionary) Data to be posted
+        :param custom_parameters: parameters that are not sent in the calls and not indicated in the url, is used for caching.
         :return: (dictionary) Data
         """
         url = quote(url, safe='/:?=&')
@@ -86,7 +87,7 @@ class SuiteCRM(Singleton):
             the_method = getattr(self.OAuth2Session, method)
         except AttributeError:
             return
-        data = self._call(the_method, parameters, url, data)
+        data = self._call(the_method, parameters, url, data, custom_parameters)
 
         if data.status_code == 401:
             data = self._revoke_token(the_method, parameters, url, data)
