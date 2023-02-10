@@ -20,7 +20,7 @@
 
 import json
 import time
-from .suitecrm import SuiteCRM
+from suitecrm import SuiteCRM
 from collections import OrderedDict
 
 
@@ -46,25 +46,21 @@ class SuiteCRMCached(SuiteCRM):
     _max_cached_requests = 100
 
     def _login(self):
-        login_parameters = OrderedDict()
-        login_parameters['user_auth'] = {
-            'user_name': self.conf.username,
-            'password': self._md5(self.conf.password)
-        }
-        login_parameters['application_name'] = self.conf.application_name
-        login_result = super(SuiteCRMCached, self)._call(
-            'login',
-            login_parameters
-        )
-        self._session_id = login_result['id']
+        """
+        Checks to see if a Oauth2 Session exists,
+        if not builds a session and retrieves the token from the config file,
+        if no token in config file, fetch a new one.
+        :return: None
+        """
+        return super(SuiteCRMCached, self)._login()
 
-    def _call(self, method, parameters):
-        cached_call = self._get_cached_call(method, parameters)
+    def _call(self, method, parameters, url, data, custom_parameters=''):
+        cached_call = self._get_cached_call(method, url, custom_parameters)
         if cached_call:
             return cached_call
         else:
-            response = super(SuiteCRMCached, self)._call(method, parameters)
-            self._add_call_to_cache(method, parameters, response)
+            response = super(SuiteCRMCached, self)._call(method, parameters, url, data, custom_parameters)
+            self._add_call_to_cache(method, url, custom_parameters, response)
             return response
 
     @staticmethod
@@ -90,9 +86,9 @@ class SuiteCRMCached(SuiteCRM):
                 del self._cache[oldest_accessed]
                 del self._cache_accessed[oldest_accessed]
 
-    def _add_call_to_cache(self, method, parameters, response):
+    def _add_call_to_cache(self, method, url, custom_parameters, response):
         try:
-            key = (method, json.dumps(parameters))
+            key = (method, json.dumps(custom_parameters), url)
             self._cache[key] = response
             self._cache_accessed[key] = self._get_time()
             self._remove_oldest_cached_requests()
@@ -100,9 +96,9 @@ class SuiteCRMCached(SuiteCRM):
         except Exception:
             return False
 
-    def _get_cached_call(self, method, parameters):
+    def _get_cached_call(self, method, url, custom_parameters):
         try:
-            key = (method, json.dumps(parameters))
+            key = (method, json.dumps(custom_parameters), url)
             cached_response = self._cache[key]
             self._cache_accessed[key] = self._get_time()
             return cached_response
