@@ -226,7 +226,7 @@ class SuiteCRM(Singleton):
         for items in relationships:
             list_module_relationships.append(items['name'])
         for module_relation in list_module_relationships:
-            data = self.get_relationships_v8(module_name, id, module_relation, True)
+            data = self.get_relationships(module_name, id, module_relation, True)
             if data['data'] != []:
                 list_relationships[str(data['data'][0]['type'])] = data['data']
         return list_relationships
@@ -279,7 +279,7 @@ class SuiteCRM(Singleton):
         bean_list = []
         print(url)
         for value in response['data']:
-            bean_list.append(self.get_bean_v8(value['type'], value['id'], link_name_to_fields_array=link_name_to_fields_array, fields=fields))
+            bean_list.append(self.get_bean(value['type'], value['id'], link_name_to_fields_array=link_name_to_fields_array, fields=fields))
         return {
             "entry_list": bean_list,
             "result_count": len(bean_list),
