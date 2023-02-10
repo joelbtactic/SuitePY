@@ -158,7 +158,7 @@ class SuiteCRM(Singleton):
         except Exception:
             return False
 
-    def get_modules(self):
+    def get_available_modules(self):
         url = '/legacy/Api/V8/meta/modules'
         response = self._request(f'{self.conf.url}{url}', 'get')
         return self._format_get_modules_response(response)
