@@ -177,7 +177,7 @@ class SuiteCRM(Singleton):
             list_response.append(values)
         return list_response
 
-    def get_module_fields_v8(self, module_name, fields = []):
+    def get_module_fields(self, module_name, fields = []):
         url = f'/legacy/Api/V8/meta/fields/{module_name}'
         response = self._request(f'{self.conf.url}{url}', 'get', custom_parameters=fields)['data']
         return self._format_get_module_fields_response(response, fields)
@@ -194,7 +194,7 @@ class SuiteCRM(Singleton):
             values['label'] = key
         return response
         
-    def get_bean_v8(self, module_name, id, fields=None, link_name_to_fields_array=''):
+    def get_bean(self, module_name, id, fields=None, link_name_to_fields_array=''):
         """
         Gets records given a specific id or filters, can be sorted only once, and the fields returned for each record
         can be specified.
@@ -231,7 +231,7 @@ class SuiteCRM(Singleton):
                 list_relationships[str(data['data'][0]['type'])] = data['data']
         return list_relationships
 
-    def get_bean_list_v8(self, module_name, fields=None, filter=None, pagination=None, sort=None):
+    def get_bean_list(self, module_name, fields=None, filter=None, pagination=None, sort=None):
         connectors = ["?", "&"]
         connectors_idx = 0
         url = f'{self.conf.url}{self.MODULE_URL}/{module_name}'
@@ -260,7 +260,7 @@ class SuiteCRM(Singleton):
         response = self._request(f'{url}', 'get')['data']
         return response
 
-    def get_relationships_v8(self, module_name, id: str, related_module_name: str, only_relationship_fields: bool = False, link_name_to_fields_array='', fields=None) -> dict:
+    def get_relationships(self, module_name, id: str, related_module_name: str, only_relationship_fields: bool = False, link_name_to_fields_array='', fields=None) -> dict:
         """
         returns the relationship between this record and another module.
         :param module_name: name of the module
@@ -285,13 +285,13 @@ class SuiteCRM(Singleton):
             "result_count": len(bean_list),
         }
 
-    def save_bean_v8(self, bean:Bean):
+    def save_bean(self, bean:Bean):
         attributes = bean.get_bean_fields()
         module = bean.module
         data = {'type': module, 'id': str(uuid.uuid4()), 'attributes': attributes}
         return self._request(f'{self.conf.url}{self.MODULE_URL}', 'post', data)
 
-    def set_relationship_v8(self, module_name, module_id, related_names, related_ids, delete=False):
+    def set_relationship(self, module_name, module_id, related_names, related_ids, delete=False):
         """
         Creates a relationship between 2 records.
         :param module_name: name of the module
