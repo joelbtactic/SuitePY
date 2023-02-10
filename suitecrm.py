@@ -159,12 +159,40 @@ class SuiteCRM(Singleton):
 
     def get_modules(self):
         url = '/legacy/Api/V8/meta/modules'
-        return self._request(f'{self.conf.url}{url}', 'get')
+        response = self._request(f'{self.conf.url}{url}', 'get')
+        return self._format_get_modules_response(response)
 
-    def get_module_fields_v8(self, module_name):
+    def _format_get_modules_response(self, response):
+        lst = ['AM_', 'AOS_', 'AOR_', 'AOK_', 'FP_']
+        list_response = []
+        for key, values in response['data']['attributes'].items():
+            values['module_key'] = key
+            for pattern in lst:
+                if pattern in key:
+                    key = key.replace(pattern, '')
+            label = key.replace('_', ' ')
+            values['label'] = label[0].upper() + label[1:]
+            values['module_label'] = values.pop('label')
+            list_response.append(values)
+        return list_response
+
+    def get_module_fields_v8(self, module_name, fields = []):
         url = f'/legacy/Api/V8/meta/fields/{module_name}'
-        return self._request(f'{self.conf.url}{url}', 'get')
+        response = self._request(f'{self.conf.url}{url}', 'get', custom_parameters=fields)['data']
+        return self._format_get_module_fields_response(response, fields)
 
+    def _format_get_module_fields_response(self, response, fields):
+        response['module_fields'] = response.pop('attributes')
+        all_fields = response['module_fields'].keys()
+        rem_fields = set(all_fields).difference(fields)
+        if len(fields) > 0:
+            for field in rem_fields:
+                response['module_fields'].pop(field)
+
+        for key, values in response['module_fields'].items():
+            values['label'] = key
+        return response
+        
     def get_bean_v8(self, module_name, id, fields=None, link_name_to_fields_array=''):
         """
         Gets records given a specific id or filters, can be sorted only once, and the fields returned for each record
