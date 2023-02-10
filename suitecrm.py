@@ -57,7 +57,7 @@ class SuiteCRM(Singleton):
                         '(KHTML, like Gecko) Chrome/97.0.4692.99 Safari/537.36'
         self._login()
 
-    def _call(self, the_method, parameters, url, data):
+    def _call(self, the_method, parameters, url, data, custom_parameters):
         try:
             if parameters == '':
                 data = the_method(url)
