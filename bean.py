@@ -24,15 +24,17 @@ class Bean(object):
     This class represents a SuiteCRM Bean.
     """
 
-    def __init__(self, module, name_value_list={}, relationship_list=[]):
+    def __init__(self, module, name_value_list=None, relationship_list=None):
         self.module = module
         self._fields = {}
-        self._set_name_value_list(name_value_list)
+        if name_value_list:
+            self._set_name_value_list(name_value_list)
         self._relationship_list = {}
-        self._set_relationship_list(relationship_list)
+        if relationship_list:
+            self._set_relationship_list(relationship_list)
 
     def _set_name_value_list(self, name_value_list):
-        for key, value in name_value_list.items():
+        for value in name_value_list.values():
             self._fields[value['name']] = value['value']
 
     def _set_relationship_list(self, relationship_list):
@@ -97,12 +99,12 @@ class Bean(object):
 
     def show(self):
         """Prints a representation of bean information."""
-        print self.module
+        print(self.module)
         for key, value in self._fields.items():
-            print '\t', key, ':', value
+            print('\t', key, ':', value)
         for relationship, records in self._relationship_list.items():
-            print '\t', relationship, ':'
+            print('\t', relationship, ':')
             for record in records:
                 for key, value in record.items():
-                    print '\t\t', key, ':', value
-                print '\t\t---- ---- ---- ---- ---- ---- ---- ----'
+                    print('\t\t', key, ':', value)
+                print('\t\t---- ---- ---- ---- ---- ---- ---- ----')

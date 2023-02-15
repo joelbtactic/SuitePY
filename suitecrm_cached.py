@@ -20,7 +20,7 @@
 
 import json
 import time
-from suitecrm import SuiteCRM
+from .suitecrm import SuiteCRM
 from collections import OrderedDict
 
 
@@ -52,7 +52,10 @@ class SuiteCRMCached(SuiteCRM):
             'password': self._md5(self.conf.password)
         }
         login_parameters['application_name'] = self.conf.application_name
-        login_result = super(SuiteCRMCached, self)._call('login', login_parameters)
+        login_result = super(SuiteCRMCached, self)._call(
+            'login',
+            login_parameters
+        )
         self._session_id = login_result['id']
 
     def _call(self, method, parameters):
@@ -64,7 +67,8 @@ class SuiteCRMCached(SuiteCRM):
             self._add_call_to_cache(method, parameters, response)
             return response
 
-    def _get_time(self):
+    @staticmethod
+    def _get_time():
         return time.time()
 
     def _get_oldest_accessed_cache_key(self):
@@ -76,7 +80,7 @@ class SuiteCRMCached(SuiteCRM):
                 else:
                     oldest_accessed = (key, timestamp)
             return oldest_accessed[0]
-        except:
+        except Exception:
             return None
 
     def _remove_oldest_cached_requests(self):
@@ -93,7 +97,7 @@ class SuiteCRMCached(SuiteCRM):
             self._cache_accessed[key] = self._get_time()
             self._remove_oldest_cached_requests()
             return True
-        except:
+        except Exception:
             return False
 
     def _get_cached_call(self, method, parameters):
@@ -102,7 +106,7 @@ class SuiteCRMCached(SuiteCRM):
             cached_response = self._cache[key]
             self._cache_accessed[key] = self._get_time()
             return cached_response
-        except:
+        except Exception:
             return None
 
     def clear_cache(self):
