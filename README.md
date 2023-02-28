@@ -31,8 +31,28 @@ pip install -r requirements.txt
 
 To be able to use get_pdf_template method, you need to install a custom WebService on your SuiteCRM instance:
 
-1. Download zip of [latest SuitePY-service release](https://github.com/sanchezfauste/SuitePY-service/releases/latest) and install it using Module Loader.
+1. Install the following requirements:
 
-    **1.1** For Suitecrm 7.10 or superior, uncompress zip and find manifest.php, then compress all files in the dir creating the new module you have to install.
+    Install the `mPDF` library:
+    ```
+    composer require mpdf/mpdf:6.1.0
+    ```
 
-2. Edit `suitepy.ini` config file and change the `url` parameter to `https://crm.example.com/custom/service/suitepy/rest.php`.
+    If it show the next error:
+
+    > In process.php line 344:
+    > proc_open(): fork failed - Cannot allocate memory  
+
+    Ignore it, and try again using the next command:
+
+    ```
+    composer update
+    ```
+
+2. Download zip of [latest SuitePY-service release](https://github.com/joelbtactic/SuitePY-service/releases/latest) and install it using Module Loader.
+
+    `2.1` For Suitecrm 7.12 or superior, uncompress zip and find manifest.php, then compress all files in the dir creating the new module you have to install.
+
+    `2.2` It is not compatible for SuiteCRM 8.X versions.
+
+3. Edit `suitepy.ini` config file and change the `url` parameter to `https://crm.example.com/custom/service/suitepy/rest.php`.
