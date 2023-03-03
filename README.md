@@ -11,8 +11,8 @@ In this section is described how to get the development environment ready on Deb
 
 It's recommended to use `virtualenv` and `pip` packages. You can install this two dependencies runnig:
 ```bash
-sudo apt-get update
-sudo apt-get install virtualenv python-pip
+sudo apt update
+sudo apt install virtualenv python3-pip
 ```
 
 Once you have `virtualenv` and `pip` tools ready it's time to prepare the virtual environment to run the application.  
