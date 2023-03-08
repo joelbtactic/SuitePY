@@ -1,6 +1,6 @@
-[![license](https://img.shields.io/github/license/sanchezfauste/SuitePY.svg?style=flat-square)](LICENSE)
+[![license](https://img.shields.io/github/license/btactic/SuitePY.svg?style=flat-square)](LICENSE)
 [![readthedocs](https://readthedocs.org/projects/suitepy/badge/?version=latest&style=flat-square)](https://suitepy.readthedocs.io/en/latest/)
-[![GitHub (pre-)release](https://img.shields.io/github/release/sanchezfauste/SuitePY/all.svg?style=flat-square)](https://github.com/sanchezfauste/SuitePY/releases/latest)
+[![GitHub (pre-)release](https://img.shields.io/github/release/btactic/SuitePY/all.svg?style=flat-square)](https://github.com/btactic/SuitePY/releases/latest)
 
 # SuitePY
 
@@ -25,6 +25,6 @@ pip install -r requirements.txt
 ```
 
 ## PDF Templates support
-To be able to use get_pdf_template method, you need to install a custom WebService on your SuiteCRM instance, you can check [SuitePY-Service README](https://github.com/joelbtactic/SuitePY-service/blob/improvements/README.md).
+To be able to use get_pdf_template method, you need to install a custom WebService on your SuiteCRM instance, you can check [SuitePY-Service README](https://github.com/btactic/SuitePY-service/blob/master/README.md).
 
 Edit `suitepy.ini` config file and change the `url` parameter to `https://crm.example.net/custom/service/suitepy/rest.php`.
