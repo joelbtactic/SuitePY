@@ -209,7 +209,7 @@ class SuiteCRM(Singleton):
         for key, values in response['module_fields'].items():
             values['label'] = key
         return response
-        
+
     def get_bean(self, module_name, id, fields=None, link_name_to_fields_array=''):
         """
         Gets records given a specific id or filters, can be sorted only once, and the fields returned for each record
@@ -244,12 +244,14 @@ class SuiteCRM(Singleton):
         list_relationships = {}
         for items in relationships:
             list_module_relationships.append(items['name'])
+
         for module_relation in list_module_relationships:
             data = self.get_relationships(
                 module_name, id, module_relation, bean_relationship=True
             )
             if data['data'] != []:
                 list_relationships[str(data['data'][0]['type'])] = data['data']
+
         return list_relationships
 
     def get_bean_list(self, module_name, fields=None, filter=None, pagination=None, sort=None):
