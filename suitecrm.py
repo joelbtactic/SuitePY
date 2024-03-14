@@ -31,11 +31,12 @@ from oauthlib.oauth2 import (
 from oauthlib.oauth2.rfc6749.errors import CustomOAuth2Error
 from requests_oauthlib import OAuth2Session
 import requests
-from suite_exceptions import *
-from bean import Bean
-from bean_exceptions import *
-from config import Config
-from singleton import Singleton
+from .suite_exceptions import *
+from .bean import Bean
+from .bean_exceptions import *
+from .config import Config
+from .singleton import Singleton
+from .filter import *
 
 class SuiteCRM(Singleton):
     """
