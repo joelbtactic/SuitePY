@@ -23,7 +23,11 @@ import uuid
 import json
 from collections import OrderedDict
 from urllib.parse import quote
-from oauthlib.oauth2 import BackendApplicationClient, TokenExpiredError, InvalidClientError
+from oauthlib.oauth2 import (
+    BackendApplicationClient,
+    TokenExpiredError,
+    InvalidClientError,
+)
 from oauthlib.oauth2.rfc6749.errors import CustomOAuth2Error
 from requests_oauthlib import OAuth2Session
 import requests
@@ -53,8 +57,10 @@ class SuiteCRM(Singleton):
 
     def __init__(self):
         self._access_token = ''
-        self._headers = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' \
-                        '(KHTML, like Gecko) Chrome/97.0.4692.99 Safari/537.36'
+        self._headers = (
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
+            '(KHTML, like Gecko) Chrome/97.0.4692.99 Safari/537.36'
+        )
         self._login()
 
     def _call(self, the_method, parameters, url, data, custom_parameters):
@@ -109,8 +115,10 @@ class SuiteCRM(Singleton):
             self._call(the_method, parameters, url, data)
             attempts += 1
         if data.status_code == 401:
-            exit('401 (Unauthorized) client id/secret has been revoked, new token was attempted and failed.')
-        
+            exit(
+                '401 (Unauthorized) client id/secret has been revoked, new token was attempted and failed.'
+            )
+
         return data
 
 
@@ -124,10 +132,12 @@ class SuiteCRM(Singleton):
         # Does session exist?
         if not hasattr(self, 'OAuth2Session'):
             client = BackendApplicationClient(client_id=self.conf.client_id)
-            self.OAuth2Session = OAuth2Session(client=client,
-                                               client_id=self.conf.client_id)
-            self.OAuth2Session.headers.update({"User-Agent": self._headers,
-                                               'Content-Type': 'application/json'})
+            self.OAuth2Session = OAuth2Session(
+                client=client, client_id=self.conf.client_id
+            )
+            self.OAuth2Session.headers.update(
+                {"User-Agent": self._headers, 'Content-Type': 'application/json'}
+            )
             if self._access_token == '':
                 self._refresh_token()
             else:
@@ -141,9 +151,13 @@ class SuiteCRM(Singleton):
         :return: None
         """
         try:
-            self.OAuth2Session.fetch_token(token_url=self.conf.url + self.TOKEN_URL,
-                                           client_id=self.conf.client_id,
-                                           client_secret=self.conf.client_secret)
+            self.OAuth2Session.fetch_token(
+                token_url=self.conf.url + self.TOKEN_URL,
+                client_id=self.conf.client_id,
+                client_secret=self.conf.client_secret,
+                verify=self.conf.verify_ssl,
+            )
+
         except InvalidClientError:
             exit('401 (Unauthorized) - client id/secret')
         except CustomOAuth2Error:
@@ -179,7 +193,9 @@ class SuiteCRM(Singleton):
 
     def get_module_fields(self, module_name, fields = []):
         url = f'/legacy/Api/V8/meta/fields/{module_name}'
-        response = self._request(f'{self.conf.url}{url}', 'get', custom_parameters=fields)['data']
+        response = self._request(
+            f'{self.conf.url}{url}', 'get', custom_parameters=fields
+        )['data']
         return self._format_get_module_fields_response(response, fields)
 
     def _format_get_module_fields_response(self, response, fields):
@@ -213,7 +229,10 @@ class SuiteCRM(Singleton):
 
         list_relationship = None
         # Execute
-        response =  self._request(f'{self.conf.url}{self.MODULE_URL}{url}', 'get')['data']
+        response = self._request(f'{self.conf.url}{self.MODULE_URL}{url}', 'get')[
+            'data'
+        ]
+
         if link_name_to_fields_array != '':
             list_relationship = self._get_bean_relationships(link_name_to_fields_array, module_name, id)
         bean = Bean(module_name,response['attributes'], list_relationship)
@@ -226,7 +245,9 @@ class SuiteCRM(Singleton):
         for items in relationships:
             list_module_relationships.append(items['name'])
         for module_relation in list_module_relationships:
-            data = self.get_relationships(module_name, id, module_relation, True)
+            data = self.get_relationships(
+                module_name, id, module_relation, bean_relationship=True
+            )
             if data['data'] != []:
                 list_relationships[str(data['data'][0]['type'])] = data['data']
         return list_relationships
@@ -291,7 +312,9 @@ class SuiteCRM(Singleton):
         data = {'type': module, 'id': str(uuid.uuid4()), 'attributes': attributes}
         return self._request(f'{self.conf.url}{self.MODULE_URL}', 'post', data)
 
-    def set_relationship(self, module_name, module_id, related_names, related_ids, delete=False):
+    def set_relationship(
+        self, module_name, module_id, related_names, related_ids, delete=False
+    ):
         """
         Creates a relationship between 2 records.
         :param module_name: name of the module
@@ -302,21 +325,29 @@ class SuiteCRM(Singleton):
         :return: (list) A list with the responses of the relationships created/deleted.
         """
         if delete:
-            return self._delete_relationship(module_name, module_id, related_names, related_ids)
-        return self._create_relationship(module_name, module_id, related_names, related_ids)
+            return self._delete_relationship(
+                module_name, module_id, related_names, related_ids
+            )
+        return self._create_relationship(
+            module_name, module_id, related_names, related_ids
+        )
 
     def _create_relationship(self, module_name, module_id, related_module_names, related_ids):
         # Post
         response = []
         url = f'/{module_name}/{module_id}/relationships'
-        for related_module_name, related_id in zip(related_module_names, related_ids):
-            data = {'type': related_module_name.capitalize(), 'id': related_id}
-            response.append(self._request(f'{self.conf.url}{self.MODULE_URL}{url}', 'post', data))
+            response.append(
+                self._request(f'{self.conf.url}{self.MODULE_URL}{url}', 'post', data)
+            )
         return response
 
-    def _delete_relationship(self, module_name, module_id, related_module_names, related_ids):
+    def _delete_relationship(
+        self, module_name, module_id, related_module_names, related_ids
+    ):
         response = []
         for related_module_name, related_id in zip(related_module_names, related_ids):
             url = f'/{module_name}/{module_id}/relationships/{related_module_name.lower()}/{related_id}'
-            response.append(self._request(f'{self.conf.url}{self.MODULE_URL}{url}', 'delete'))
+            response.append(
+                self._request(f'{self.conf.url}{self.MODULE_URL}{url}', 'delete')
+            )
         return response
