@@ -190,7 +190,7 @@ class SuiteCRM(Singleton):
             values['label'] = label[0].upper() + label[1:]
             values['module_label'] = values.pop('label')
             list_response.append(values)
-        return list_response
+        return {"modules": list_response}
 
     def get_module_fields(self, module_name, fields = []):
         url = f'/legacy/Api/V8/meta/fields/{module_name}'
