@@ -207,8 +207,6 @@ class SuiteCRM(Singleton):
             for field in rem_fields:
                 response['module_fields'].pop(field)
 
-        for key, values in response['module_fields'].items():
-            values['label'] = key
         return response
 
     def get_bean(self, module_name, id, fields=None, link_name_to_fields_array=''):
