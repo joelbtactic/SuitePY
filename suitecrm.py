@@ -122,7 +122,6 @@ class SuiteCRM(Singleton):
 
         return data
 
-
     def _login(self):
         """
         Checks to see if a Oauth2 Session exists,
