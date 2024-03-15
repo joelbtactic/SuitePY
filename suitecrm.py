@@ -181,6 +181,9 @@ class SuiteCRM(Singleton):
         return self._format_get_modules_response(response)
 
     def _format_get_modules_response(self, response):
+        """
+        It returns all the available modules with their label name
+        """
         lst = ['AM_', 'AOS_', 'AOR_', 'AOK_', 'FP_']
         list_response = []
         for key, values in response['data']['attributes'].items():
