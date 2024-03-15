@@ -253,6 +253,9 @@ class SuiteCRM(Singleton):
         return bean
 
     def _get_bean_relationships(self, relationships, module_name, id):
+        """
+        Retrieve all the relationships and their fields for the module specified
+        """
         list_module_relationships = []
         list_relationships = {}
         for items in relationships:
