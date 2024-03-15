@@ -355,6 +355,25 @@ class SuiteCRM(Singleton):
         order=None,
     ) -> dict:
         """
+        Retrieve a collection of beans that are related to the specified bean
+        and optionally return relationship data for those related beans.
+
+        :param str module_name: name of the module that the primary record is from.
+        :param str id: ID of the bean in the specified module.
+        :param str related_module_name: name of the link field to return records from.
+        
+        :param list[dict] link_name_to_fields_array: for every related bean returned,
+            specify link fields name to fields info for that bean to be returned.
+        :param bool only_relationship_fields: To choose if return the related Bean, or the related Bean with their relationships
+        :param int limit: the maximum number of records to return.
+        :param int offset: the result offset to start from.
+        :param str order_by: SQL ORDER BY clause without the phrase 'ORDER BY'.
+        :param bool bean_relationship: If its true it returns the relationship with the response format.
+        :param str filter: a portion of the where clause of the SQL statement to find the related items.
+            The SQL query will already be filtered to only include the beans that are related to the specified bean.
+        :param str order: The sort order, by default will be asc.
+        :return: dict containing results matching criteria.
+        :rtype: dict[str, object]
         """
         connectors = ["?", "&"]
         sort_order = {"desc": "-", None: ""}
