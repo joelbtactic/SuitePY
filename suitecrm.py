@@ -445,3 +445,17 @@ class SuiteCRM(Singleton):
                 self._request(f'{self.conf.url}{self.MODULE_URL}{url}', 'delete')
             )
         return response
+
+    def get_note_attachment(self, note_id):
+        """
+        Retrieve an attachment from a note.
+
+        :param str note_id: ID of the appropriate Note.
+        :return: the requested attachment.
+        :rtype: dict[str, object]
+        """
+        url = f'/legacy/Api/V8/custom/getNoteAttach/{note_id}'
+
+        response = self._request(f'{self.conf.url}{url}', 'get')
+        return response
+
