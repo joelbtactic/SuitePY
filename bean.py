@@ -24,7 +24,7 @@ class Bean(object):
     This class represents a SuiteCRM Bean.
     """
 
-    def __init__(self, module, name_value_list=None, relationship_list=None):
+    def __init__(self, module, name_value_list=None, relationship_list=None, id=''):
         self.module = module
         self._fields = {}
         if name_value_list:
