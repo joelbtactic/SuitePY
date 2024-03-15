@@ -463,6 +463,7 @@ class SuiteCRM(Singleton):
         :param related_names: the modules names of the records you want to create a relationships,
                ie. Contacts.
         :param related_ids: ids of the records inside of the other module.
+        :param bool delete: if its true it deletes the relationship, if its false it creates it. by default is False
         :return: (list) A list with the responses of the relationships created/deleted.
         """
         if delete:
