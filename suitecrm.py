@@ -279,6 +279,19 @@ class SuiteCRM(Singleton):
         offset=1,
         order_by=None,
     ):
+        """
+        Get list of beans matching criteria.
+
+        :param str module_name: name of the module to return records from.
+        :param str filter: SQL WHERE clause without the word 'WHERE'.
+        :param str order_by: SQL ORDER BY clause without the phrase 'ORDER BY'.
+        :param int offset: the record offset (page) to start from.
+        :param list[str] select_fields: a list of the fields to be included in the results.
+            This optional parameter allows for only needed fields to be retrieved.
+        :param int max_results: the maximum number of records to return.
+        :return: dict containing results matching criteria.
+        :rtype: dict[str, object]
+        """
         connectors = ["?", "&"]
         connectors_idx = 0
         url = f'{self.conf.url}{self.MODULE_URL}/{module_name}'
