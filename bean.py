@@ -45,6 +45,7 @@ class Bean(object):
                 record_map = {}
                 for key_atribute, attribute_value in record['attributes'].items():
                     record_map[key_atribute] = attribute_value
+                record_map['id'] = record['id']
                 records.append(record_map)
             self._relationship_list[key] = records
 
