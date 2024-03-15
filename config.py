@@ -58,8 +58,9 @@ class Config:
         self._application_name = config.get(
             "SuiteCRM API Credentials", "application_name"
         )
-        self._verify_ssl = bool(config.get(
-            "SuiteCRM API Credentials", "verify_ssl"))
+        self._verify_ssl = (
+            config.get("SuiteCRM API Credentials", "verify_ssl").lower() != "false"
+        )
 
     @staticmethod
     def _create_config_file(config_file):
