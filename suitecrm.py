@@ -312,29 +312,81 @@ class SuiteCRM(Singleton):
             "current_limit": max_results,
         }
 
-    def get_relationships(self, module_name, id: str, related_module_name: str, only_relationship_fields: bool = False, link_name_to_fields_array='', fields=None) -> dict:
+    def get_relationships(
+        self,
+        module_name,
+        id: str,
+        related_module_name: str,
+        only_relationship_fields: bool = False,
+        link_name_to_fields_array='',
+        limit='',
+        offset='',
+        order_by='',
+        bean_relationship: bool = False,
+        filter='',
+        order=None,
+    ) -> dict:
         """
-        returns the relationship between this record and another module.
-        :param module_name: name of the module
-        :param id: (string) id of the current module record.
-        :param related_module_name: (string) the module name you want to search relationships for, ie. Contacts.
-        :param link_name_to_fields_array: a list of link_names and for each link_name.
-        :param fields: (list) A list of fields you want to be returned from each related record.
-        :return: (dictionary) A list of relationships that this module's record contains with the related module.
         """
-        url = f'/{module_name}/{id}/relationships/{related_module_name.lower()}'
-        response = self._request(f'{self.conf.url}{self.MODULE_URL}{url}', 'get')
+        connectors = ["?", "&"]
+        sort_order = {"desc": "-", None: ""}
+        connectors_idx = 0
 
-        if only_relationship_fields:
+        url = f'/{module_name}/{id}/relationships/{related_module_name.lower()}'
+
+        if order_by:
+            url += '{0}sort={1}{2}'.format(
+                connectors[connectors_idx], sort_order[order], order_by
+            )
+            connectors_idx = 1
+
+        if filter:
+            filter = from_legacy_query(filter)
+            url += '{0}{1}'.format(
+                connectors[connectors_idx], filter.to_filter_string()
+            )
+            connectors_idx = 1
+
+        if offset:
+            url += '{0}page[number]={1}'.format(connectors[connectors_idx], offset)
+            connectors_idx = 1
+
+        if limit:
+            url += '{0}page[size]={1}'.format(connectors[connectors_idx], limit)
+
+        response = self._request(f'{self.conf.url}{self.MODULE_URL}{url}', 'get')
+        next_page = response.get("links", {}).get("next")
+        prev_page = response.get("links", {}).get("prev")
+
+        if bean_relationship:
             return response
 
         bean_list = []
-        print(url)
-        for value in response['data']:
-            bean_list.append(self.get_bean(value['type'], value['id'], link_name_to_fields_array=link_name_to_fields_array, fields=fields))
+        if only_relationship_fields:
+            for value in response['data']:
+                bean_list.append(
+                    Bean(
+                        module=value['type'],
+                        name_value_list=value['attributes'],
+                        id=value['id'],
+                    )
+                )
+        else:
+            for value in response['data']:
+                bean_list.append(
+                    self.get_bean(
+                        value['type'],
+                        value['id'],
+                        link_name_to_fields_array=link_name_to_fields_array,
+                    )
+                )
         return {
             "entry_list": bean_list,
             "result_count": len(bean_list),
+            "previous_offset": offset - 1 if prev_page != None else None,
+            "current_offset": offset,
+            "next_offset": offset + 1 if next_page != None else None,
+            "current_limit": limit,
         }
 
     def save_bean(self, bean:Bean):
