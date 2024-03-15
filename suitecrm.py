@@ -421,10 +421,15 @@ class SuiteCRM(Singleton):
             module_name, module_id, related_names, related_ids
         )
 
-    def _create_relationship(self, module_name, module_id, related_module_names, related_ids):
+    def _create_relationship(
+        self, module_name, module_id, related_module_name, related_ids
+    ):
+
         # Post
         response = []
         url = f'/{module_name}/{module_id}/relationships'
+        for related_id in related_ids:
+            data = {'type': related_module_name, 'id': related_id}
             response.append(
                 self._request(f'{self.conf.url}{self.MODULE_URL}{url}', 'post', data)
             )
