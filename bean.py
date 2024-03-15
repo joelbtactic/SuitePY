@@ -27,6 +27,7 @@ class Bean(object):
     def __init__(self, module, name_value_list=None, relationship_list=None, id=''):
         self.module = module
         self._fields = {}
+        self._fields['id'] = id
         if name_value_list:
             self._set_name_value_list(name_value_list)
         self._relationship_list = {}
