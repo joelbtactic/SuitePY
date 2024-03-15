@@ -255,7 +255,15 @@ class SuiteCRM(Singleton):
 
         return list_relationships
 
-    def get_bean_list(self, module_name, fields=None, filter=None, pagination=None, sort=None):
+    def get_bean_list(
+        self,
+        module_name,
+        fields=None,
+        filter=None,
+        max_results='',
+        offset=1,
+        order_by=None,
+    ):
         connectors = ["?", "&"]
         connectors_idx = 0
         url = f'{self.conf.url}{self.MODULE_URL}/{module_name}'
@@ -265,24 +273,44 @@ class SuiteCRM(Singleton):
             url += f'{connectors[connectors_idx]}fields[{module_name}]=' + ','.join(fields)
             connectors_idx = 1
 
-        if pagination:
-            if pagination.page_number != None:
-                url += "{0}page[number]={1}&page[size]={2}".format(connectors[connectors_idx], pagination.page_number, pagination.page_size)
-            else:
-                url += "{0}page[size]={1}".format(connectors[connectors_idx], pagination.page_size)
-            connectors_idx = 1
-        
-        if sort:
-            url += f'{connectors[connectors_idx]}sort=-{sort}'
+        if offset:
+            url += '{0}page[number]={1}'.format(connectors[connectors_idx], offset)
             connectors_idx = 1
 
+        if max_results:
+            url += '{0}page[size]={1}'.format(connectors[connectors_idx], max_results)
+
+        if order_by:
+            url += f'{connectors[connectors_idx]}sort=-{order_by}'
+            connectors_idx = 1
 
         if filter:
-            url += "{0}{1}".format(connectors[connectors_idx], filter.to_filter_string())
+            filter = from_legacy_query(filter)
+            url += '{0}{1}'.format(
+                connectors[connectors_idx], filter.to_filter_string()
+            )
             connectors_idx = 1
 
-        response = self._request(f'{url}', 'get')['data']
-        return response
+        response = self._request(f'{url}', 'get')
+        next_page = response.get('links', {}).get('next')
+        prev_page = response.get('links', {}).get('prev')
+        bean_list = []
+        for value in response['data']:
+            bean_list.append(
+                Bean(
+                    module=value['type'],
+                    name_value_list=value['attributes'],
+                    id=value['id'],
+                )
+            )
+        return {
+            "entry_list": bean_list,
+            "result_count": len(bean_list),
+            "previous_offset": offset - 1 if prev_page != None else None,
+            "current_offset": offset,
+            "next_offset": offset + 1 if next_page != None else None,
+            "current_limit": max_results,
+        }
 
     def get_relationships(self, module_name, id: str, related_module_name: str, only_relationship_fields: bool = False, link_name_to_fields_array='', fields=None) -> dict:
         """
