@@ -56,8 +56,7 @@ class Config:
         self._client_id = config.get("SuiteCRM API Credentials", "client_id")
         self._client_secret = config.get("SuiteCRM API Credentials", "client_secret")
         self._application_name = config.get(
-            "SuiteCRM API Credentials",
-            "application_name"
+            "SuiteCRM API Credentials", "application_name"
         )
         self._verify_ssl = bool(config.get(
             "SuiteCRM API Credentials", "verify_ssl"))
@@ -67,11 +66,7 @@ class Config:
         config_file = open(config_file, "w")
         config = configparser.ConfigParser()
         config.add_section("SuiteCRM API Credentials")
-        config.set(
-            "SuiteCRM API Credentials",
-            "url",
-            "https://crm.example.org"
-        )
+        config.set("SuiteCRM API Credentials", "url", "https://crm.example.org")
         config.set("SuiteCRM API Credentials", "client_id", "client_id")
         config.set("SuiteCRM API Credentials", "client_secret", "client_secret")
         config.set("SuiteCRM API Credentials", "application_name", "SuitePY")
