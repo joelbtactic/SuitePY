@@ -459,3 +459,18 @@ class SuiteCRM(Singleton):
         response = self._request(f'{self.conf.url}{url}', 'get')
         return response
 
+    def get_pdf_template(self, template_id, bean_module, bean_id):
+        """
+        Retrieve PDF Template for a given module record.
+
+        :param str template_id: template ID used to generate PDF.
+        :param str bean_module: module name of the bean that will be used to populate PDF.
+        :param str bean_id: ID of the bean record.
+        :return: the generated PDF.
+        :rtype: dict[str, str]
+        """
+
+        url = f'/legacy/Api/V8/custom/getPdfTemplate/{bean_module}/{bean_id}/{template_id}'
+
+        response = self._request(f'{self.conf.url}{url}', 'get')
+        return response
