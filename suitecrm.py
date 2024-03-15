@@ -197,7 +197,13 @@ class SuiteCRM(Singleton):
             list_response.append(values)
         return {"modules": list_response}
 
-    def get_module_fields(self, module_name, fields = []):
+    def get_module_fields(self, module_name, fields=[]):
+        """
+        Retrieve field definitions of a module.
+        :param str module_name: the name of the module to return records from.
+        :param list[str] fields: if specified then retrieve definition of specified fields only.
+        :return: field definitions of the specified module.
+        """
         url = f'/legacy/Api/V8/meta/fields/{module_name}'
         response = self._request(
             f'{self.conf.url}{url}', 'get', custom_parameters=fields
