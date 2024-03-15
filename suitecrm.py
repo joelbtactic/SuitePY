@@ -437,6 +437,11 @@ class SuiteCRM(Singleton):
         }
 
     def save_bean(self, bean: Bean, update: bool = False):
+        """
+        Saves a Bean object to SuiteCRM.
+
+        :param Bean bean: Bean object.
+        """
         module = bean.module
         attributes = bean.get_bean_fields()
         if update:
