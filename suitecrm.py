@@ -232,9 +232,12 @@ class SuiteCRM(Singleton):
         ]
 
         if link_name_to_fields_array != '':
-            list_relationship = self._get_bean_relationships(link_name_to_fields_array, module_name, id)
-        bean = Bean(module_name,response['attributes'], list_relationship)
-        # print(response)
+            list_relationship = self._get_bean_relationships(
+                link_name_to_fields_array, module_name, id
+            )
+        bean = Bean(
+            module_name, response['attributes'], list_relationship, response['id']
+        )
         return bean
 
     def _get_bean_relationships(self, relationships, module_name, id):
