@@ -173,6 +173,9 @@ class SuiteCRM(Singleton):
             return False
 
     def get_available_modules(self):
+        """
+        Returns all the available modules
+        """
         url = '/legacy/Api/V8/meta/modules'
         response = self._request(f'{self.conf.url}{url}', 'get')
         return self._format_get_modules_response(response)
