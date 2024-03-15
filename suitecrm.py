@@ -389,11 +389,17 @@ class SuiteCRM(Singleton):
             "current_limit": limit,
         }
 
-    def save_bean(self, bean:Bean):
-        attributes = bean.get_bean_fields()
+    def save_bean(self, bean: Bean, update: bool = False):
         module = bean.module
-        data = {'type': module, 'id': str(uuid.uuid4()), 'attributes': attributes}
-        return self._request(f'{self.conf.url}{self.MODULE_URL}', 'post', data)
+        attributes = bean.get_bean_fields()
+        if update:
+            data = {'type': module, 'id': bean['id'], 'attributes': attributes}
+            response = self._request(f"{self.conf.url}{self.MODULE_URL}", "patch", data)
+        else:
+            data = {'type': module, 'attributes': attributes}
+            response = self._request(f'{self.conf.url}{self.MODULE_URL}', 'post', data)
+            bean['id'] = response['data']['id']
+        return response
 
     def set_relationship(
         self, module_name, module_id, related_names, related_ids, delete=False
