@@ -373,6 +373,7 @@ class SuiteCRM(metaclass=Singleton):
         :param str filter: a portion of the where clause of the SQL statement to find the related items.
             The SQL query will already be filtered to only include the beans that are related to the specified bean.
         :param str order: The sort order, by default will be asc.
+        :param bool last: If its true it returns the records of the last page.
         :return: dict containing results matching criteria.
         :rtype: dict[str, object]
         """
