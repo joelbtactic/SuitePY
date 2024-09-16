@@ -45,14 +45,10 @@ class SuiteCRMCached(SuiteCRM):
     _cache_accessed = {}
     _max_cached_requests = 100
 
-    def _login(self):
-        """
-        Checks to see if a Oauth2 Session exists,
-        if not builds a session and retrieves the token from the config file,
-        if no token in config file, fetch a new one.
-        :return: None
-        """
-        return super(SuiteCRMCached, self)._login()
+    def __init__(self, suitecrm_instance_attr: dict = {}):
+            # Copy the essential shared attributes explicitly
+            self.__dict__.update(suitecrm_instance_attr)
+            super().__init__()
 
     def _call(self, method, parameters, url, data, custom_parameters=''):
         cached_call = self._get_cached_call(method, url, custom_parameters)
