@@ -60,12 +60,14 @@ class SuiteCRM(metaclass=Singleton):
         return self._access_token
 
     def __init__(self):
-        self._access_token = ''
-        self._headers = (
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
-            '(KHTML, like Gecko) Chrome/97.0.4692.99 Safari/537.36'
-        )
-        self._login()
+        if not hasattr(self, '_initialized') or not self._initialized:
+            self._access_token = ''
+            self._headers = (
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
+                '(KHTML, like Gecko) Chrome/97.0.4692.99 Safari/537.36'
+            )
+            self._login()
+            self._initialized = True
 
     def _call(self, the_method, parameters, url, data, custom_parameters):
         with self._lock:
