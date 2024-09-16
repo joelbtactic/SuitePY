@@ -360,6 +360,7 @@ class SuiteCRM(metaclass=Singleton):
         bean_relationship: bool = False,
         filter='',
         order=None,
+        last=False
     ) -> dict:
         """
         Retrieve a collection of beans that are related to the specified bean
@@ -409,8 +410,19 @@ class SuiteCRM(metaclass=Singleton):
             url += '{0}page[size]={1}'.format(connectors[connectors_idx], limit)
 
         response = self._request(f'{self.conf.url}{self.MODULE_URL}{url}', 'get')
+
+        last_page = response.get("links", {}).get("last")
+
+        # It checks if param last is true and if last_page is possible, then it calls the API endpoint to obtain last page records
+        if last and last_page != None:
+            last = False
+            last_page = "/legacy/Api/" + last_page
+            response = self._request(f"{self.conf.url}{last_page}", "get")
+            offset = response['meta']['total-pages']
+            
         next_page = response.get("links", {}).get("next")
         prev_page = response.get("links", {}).get("prev")
+        last_page = response.get("links", {}).get("last")
 
         if bean_relationship:
             return response
@@ -441,6 +453,9 @@ class SuiteCRM(metaclass=Singleton):
             "current_offset": offset,
             "next_offset": offset + 1 if next_page != None else None,
             "current_limit": limit,
+            "last_page": response['meta']['total-pages'] if last_page != None else None,
+            "first_page": 1 if offset != 1 else None,
+            "last_page_control": last
         }
 
     def save_bean(self, bean: Bean, update: bool = False):
