@@ -8,6 +8,7 @@ class Comparison(enum.Enum):
    LT = 5
    LTE = 6
    LIKE = 7
+   NOTLIKE = 8
 
 class Logical(enum.Enum):
     AND = 1
@@ -67,8 +68,10 @@ def from_legacy_query(legacy_query):
         ">=": Comparison.GTE,
         "<": Comparison.LT,
         "<=": Comparison.LTE,
-        "like": Comparison.LIKE
+        "like": Comparison.LIKE,
+        "notlike": Comparison.NOTLIKE
     }
+
     logical = Logical.AND  # Assuming all legacy queries are in AND conjunction
     query = []
 
@@ -77,15 +80,14 @@ def from_legacy_query(legacy_query):
     
     for part in parts:
         # Split each part into field, comparison, and criteria
-        if "like" in part:
+        if "notlike" in part:
+            field, criteria = part.split(" notlike ")
+            comparison_enum = comparison_sym["notlike"]
+
+        elif "like" in part:
             field, criteria = part.split(" like ")
             comparison_enum = comparison_sym["like"]
-        #  It doesn't work in all the cases
-        elif "DATE(" in part:
-            field, comparison, criteria = part.split(" ")
-            field = field.replace("DATE(", "").replace(")", "")
-            criteria = criteria.replace("DATE(", "").replace(")", "")
-            comparison_enum = comparison_sym[comparison]
+
         else:
             field, comparison, criteria = part.split()
             comparison_enum = comparison_sym[comparison]
