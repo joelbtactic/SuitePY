@@ -47,7 +47,7 @@ class SuiteCRM(metaclass=Singleton):
     """
 
     conf = Config()
-
+    _lock = threading.Lock()
     # The follwing URLs are for the SuiteCRM 8.X versions
     TOKEN_URL = '/legacy/Api/access_token'
     MODULE_URL = '/legacy/Api/V8/module'
@@ -68,18 +68,19 @@ class SuiteCRM(metaclass=Singleton):
         self._login()
 
     def _call(self, the_method, parameters, url, data, custom_parameters):
-        try:
-            if parameters == '':
-                data = the_method(url)
-            else:
-                data = the_method(url, data=data)
-        except TokenExpiredError:
-            self._refresh_token()
-            if parameters == '':
-                data = the_method(url)
-            else:
-                data = the_method(url, data=data)
-        return data
+        with self._lock:
+            try:
+                if parameters == '':
+                    response = the_method(url)
+                else:
+                    response = the_method(url, data=data)
+            except TokenExpiredError:
+                self._refresh_token()
+                if parameters == '':
+                    response = the_method(url)
+                else:
+                    response = the_method(url, data=data)
+        return response
 
     def _request(self, url: str, method, parameters='', custom_parameters=''):
         """
