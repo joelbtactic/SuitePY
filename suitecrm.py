@@ -172,13 +172,6 @@ class SuiteCRM(metaclass=Singleton):
         # Update configuration file with new token'
         self._access_token = str(self.OAuth2Session.token)
 
-    @staticmethod
-    def _get_bean_failed(result):
-        try:
-            return result['entry_list'][0]['name_value_list'][0]['name'] == 'warning'
-        except Exception:
-            return False
-
     def get_available_modules(self):
         """
         Returns all the available modules
