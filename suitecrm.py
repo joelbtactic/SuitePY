@@ -41,7 +41,7 @@ from .filter import *
 import threading
 import logging
 
-class SuiteCRM(Singleton):
+class SuiteCRM(metaclass=Singleton):
     """
     This class contains methods to interact with a SuiteCRM instance.
     """
