@@ -20,7 +20,7 @@
 
 import configparser
 import os.path
-
+import logging
 
 class Config:
     """
@@ -28,6 +28,8 @@ class Config:
 
     This avoids the need of hard-code the credentials in the code.
     """
+
+    _logger = logging.getLogger('bPortal')
 
     def __init__(self, config_file="suitepy.ini"):
         """
@@ -41,11 +43,11 @@ class Config:
             base_dir = os.path.dirname(os.path.abspath(__file__))
             abs_path = os.path.join(base_dir, config_file)
         if os.path.isfile(abs_path):
-            print("Loading config from file: " + abs_path)
+            self._logger.info("Loading config from file: " + abs_path)
             self._load_config_file(abs_path)
         else:
-            print("Creating new config file on: " + abs_path)
-            print("Please edit config file and rerun the application.")
+            self._logger.info("Creating new config file on: " + abs_path)
+            self._logger.info("Please edit config file and rerun the application.")
             self._create_config_file(abs_path)
             exit(0)
 
