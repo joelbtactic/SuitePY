@@ -51,6 +51,7 @@ class SuiteCRM(metaclass=Singleton):
     # The follwing URLs are for the SuiteCRM 8.X versions
     TOKEN_URL = '/legacy/Api/access_token'
     MODULE_URL = '/legacy/Api/V8/module'
+    _logger = logging.getLogger('bPortal')
 
     # The following URLs are for the SuiteCRM 7.X versions
     # TOKEN_URL = '/Api/access_token'
@@ -106,8 +107,9 @@ class SuiteCRM(metaclass=Singleton):
             data = self._revoke_token(the_method, parameters, url, data)
 
         if data.status_code == 400:
-            exit('400 (BAD REQUEST)')
-
+            self._logger.error(f'400 (BAD REQUEST): {data.content.decode()}')
+            raise Exception('400 (BAD REQUEST)', data.content.decode())
+        
         # Database Failure
         # SuiteCRM does not allow to query by a custom field see README, #Limitations
         if data.status_code == 400 and 'Database failure.' in data.content.decode():
@@ -122,7 +124,7 @@ class SuiteCRM(metaclass=Singleton):
             self._call(the_method, parameters, url, data)
             attempts += 1
         if data.status_code == 401:
-            exit(
+            self._logger.error(
                 '401 (Unauthorized) client id/secret has been revoked, new token was attempted and failed.'
             )
 
@@ -163,11 +165,10 @@ class SuiteCRM(metaclass=Singleton):
                 client_secret=self.conf.client_secret,
                 verify=self.conf.verify_ssl,
             )
-
-        except InvalidClientError:
-            exit('401 (Unauthorized) - client id/secret')
+        except InvalidClientError:            
+            self._logger.error(f'401 (Unauthorized) - client id/secret')
         except CustomOAuth2Error:
-            exit('401 (Unauthorized) - client id')
+            self._logger.error(f'401 (Unauthorized) - client id')
         # Update configuration file with new token'
         self._access_token = str(self.OAuth2Session.token)
 
