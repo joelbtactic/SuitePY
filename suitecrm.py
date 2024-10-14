@@ -67,6 +67,9 @@ class SuiteCRM(metaclass=Singleton):
                 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
                 '(KHTML, like Gecko) Chrome/97.0.4692.99 Safari/537.36'
             )
+            self._url_header = self._get_url_header()
+            self.TOKEN_URL = f'{self._url_header}/Api/access_token'
+            self.MODULE_URL = f'{self._url_header}/Api/V8/module'
             self._login()
             self._initialized = True
 
