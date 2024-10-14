@@ -60,6 +60,9 @@ class Config:
         self._application_name = config.get(
             "SuiteCRM API Credentials", "application_name"
         )
+        self._suitecrmversion = config.get(
+            "SuiteCRM API Credentials", "suitecrmversion"
+        )
         self._verify_ssl = (
             config.get("SuiteCRM API Credentials", "verify_ssl").lower() != "false"
         )
@@ -73,6 +76,7 @@ class Config:
         config.set("SuiteCRM API Credentials", "client_id", "client_id")
         config.set("SuiteCRM API Credentials", "client_secret", "client_secret")
         config.set("SuiteCRM API Credentials", "application_name", "SuitePY")
+        config.set("SuiteCRM API Credentials", "suitecrmversion", "7")
         config.set("SuiteCRM API Credentials", "verify_ssl", True)
         config.write(config_file)
         config_file.close()
@@ -116,6 +120,16 @@ class Config:
         :rtype: str
         """
         return self._application_name
+
+    @property
+    def suitecrmversion(self):
+        """
+        Get suitecrm version.
+
+        :return: suitecrm version.
+        :rtype: str
+        """
+        return self._suitecrmversion
 
     @property
     def verify_ssl(self):
