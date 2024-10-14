@@ -48,14 +48,8 @@ class SuiteCRM(metaclass=Singleton):
 
     conf = Config()
     _lock = threading.Lock()
-    # The follwing URLs are for the SuiteCRM 8.X versions
-    TOKEN_URL = '/legacy/Api/access_token'
-    MODULE_URL = '/legacy/Api/V8/module'
     _logger = logging.getLogger('bPortal')
 
-    # The following URLs are for the SuiteCRM 7.X versions
-    # TOKEN_URL = '/Api/access_token'
-    # MODULE_URL = '/Api/V8/module'
 
     def get_token(self):
         return self._access_token
