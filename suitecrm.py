@@ -113,7 +113,6 @@ class SuiteCRM(metaclass=Singleton):
             raise Exception('400 (BAD REQUEST)', data.content.decode())
         
         # Database Failure
-        # SuiteCRM does not allow to query by a custom field see README, #Limitations
         if data.status_code == 400 and 'Database failure.' in data.content.decode():
             raise Exception(data.content.decode())
 
