@@ -178,7 +178,7 @@ class SuiteCRM(metaclass=Singleton):
         """
         Returns all the available modules
         """
-        url = '/legacy/Api/V8/meta/modules'
+        url = f'{self._url_header}/Api/V8/meta/modules'
         response = self._request(f'{self.conf.url}{url}', 'get')
         return self._format_get_modules_response(response)
 
@@ -206,7 +206,7 @@ class SuiteCRM(metaclass=Singleton):
         :param list[str] fields: if specified then retrieve definition of specified fields only.
         :return: field definitions of the specified module.
         """
-        url = f'/legacy/Api/V8/meta/fields/{module_name}'
+        url = f'{self._url_header}/Api/V8/meta/fields/{module_name}'
         response = self._request(
             f'{self.conf.url}{url}', 'get', custom_parameters=fields
         )['data']
@@ -412,7 +412,7 @@ class SuiteCRM(metaclass=Singleton):
         # It checks if param last is true and if last_page is possible, then it calls the API endpoint to obtain last page records
         if last and last_page != None:
             last = False
-            last_page = "/legacy/Api/" + last_page
+            last_page = f'{self._url_header}/Api/{last_page}'
             response = self._request(f"{self.conf.url}{last_page}", "get")
             offset = response['meta']['total-pages']
             
@@ -525,7 +525,7 @@ class SuiteCRM(metaclass=Singleton):
         :return: the requested attachment.
         :rtype: dict[str, object]
         """
-        url = f'/legacy/Api/V8/custom/getNoteAttach/{note_id}'
+        url = f'{self._url_header}/Api/V8/custom/getNoteAttach/{note_id}'
 
         response = self._request(f'{self.conf.url}{url}', 'get')
         return response
@@ -540,8 +540,6 @@ class SuiteCRM(metaclass=Singleton):
         :return: the generated PDF.
         :rtype: dict[str, str]
         """
-
-        url = f'/legacy/Api/V8/custom/getPdfTemplate/{bean_module}/{bean_id}/{template_id}'
-
+        url = f'{self._url_header}/Api/V8/custom/getPdfTemplate/{bean_module}/{bean_id}/{template_id}'
         response = self._request(f'{self.conf.url}{url}', 'get')
         return response
