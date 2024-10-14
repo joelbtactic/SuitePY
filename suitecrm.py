@@ -70,6 +70,11 @@ class SuiteCRM(metaclass=Singleton):
             self._login()
             self._initialized = True
 
+    def _get_url_header(self):
+        if self.conf.suitecrmversion == '7':
+            return ''
+        return '/legacy'
+
     def _call(self, the_method, parameters, url, data, custom_parameters):
         with self._lock:
             try:
