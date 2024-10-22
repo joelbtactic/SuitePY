@@ -31,7 +31,7 @@ class FilterTriplet:
         self._criteria = criteria
     
     def to_filter_string(self):
-        return "filter[{0}][{1}]={2}".format(self._field, self._comparison.name.lower(), self._criteria)
+        return "filter[{0}][{1}][]={2}".format(self._field, self._comparison.name.lower(), self._criteria)
 
 class Filter:
 
