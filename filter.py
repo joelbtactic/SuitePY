@@ -72,11 +72,15 @@ def from_legacy_query(legacy_query):
         "notlike": Comparison.NOTLIKE
     }
 
-    logical = Logical.AND  # Assuming all legacy queries are in AND conjunction
     query = []
 
     # Split the legacy query string into parts
+    logical = Logical.AND
     parts = legacy_query.split(" AND ")
+
+    if " OR " in legacy_query:
+        logical = Logical.OR
+        parts = legacy_query.split(" OR ")
     
     for part in parts:
         # Split each part into field, comparison, and criteria
