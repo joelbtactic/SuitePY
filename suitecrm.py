@@ -107,9 +107,9 @@ class SuiteCRM(metaclass=Singleton):
             self._logger.error(f'400 (BAD REQUEST): {data.content.decode()}')
             raise Exception('400 (BAD REQUEST)', data.content.decode())
         
-        # Database Failure
-        if data.status_code == 400 and 'Database failure.' in data.content.decode():
-            raise Exception(data.content.decode())
+        elif not data.ok:
+            self._logger.error(f'Unexpected error {data.status_code}: {data.content.decode()}')
+            raise Exception(f'Unexpected error {data.status_code}', data.content.decode())
 
         return json.loads(data.content)
             
