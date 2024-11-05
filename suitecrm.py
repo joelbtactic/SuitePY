@@ -71,15 +71,15 @@ class SuiteCRM(metaclass=Singleton):
         with self._lock:
             try:
                 if parameters == '':
-                    response = the_method(url)
+                    response = the_method(url, verify=self.conf.verify_ssl)
                 else:
-                    response = the_method(url, data=data)
+                    response = the_method(url, data=data, verify=self.conf.verify_ssl)
             except TokenExpiredError:
                 self._refresh_token()
                 if parameters == '':
-                    response = the_method(url)
+                    response = the_method(url, verify=self.conf.verify_ssl)
                 else:
-                    response = the_method(url, data=data)
+                    response = the_method(url, data=data, verify=self.conf.verify_ssl)
         return response
 
     def _request(self, url: str, method, parameters='', custom_parameters=''):
