@@ -168,11 +168,14 @@ class SuiteCRM(metaclass=Singleton):
         # Update configuration file with new token'
         self._access_token = str(self.OAuth2Session.token)
 
-    def get_available_modules(self):
+    def get_available_modules(self, lang=''):
         """
         Returns all the available modules
         """
-        url = f'{self._url_header}/Api/V8/meta/modules'
+        if not lang:
+            url = f'{self._url_header}/Api/V8/meta/modules'
+        else:
+            url = f'{self._url_header}/Api/V8/meta/modules/{lang}'
         response = self._request(f'{self.conf.url}{url}', 'get')
         return self._format_get_modules_response(response)
 
@@ -184,11 +187,6 @@ class SuiteCRM(metaclass=Singleton):
         list_response = []
         for key, values in response['data']['attributes'].items():
             values['module_key'] = key
-            for pattern in lst:
-                if pattern in key:
-                    key = key.replace(pattern, '')
-            label = key.replace('_', ' ')
-            values['label'] = label[0].upper() + label[1:]
             values['module_label'] = values.pop('label')
             list_response.append(values)
         return {"modules": list_response}
