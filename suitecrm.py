@@ -33,7 +33,6 @@ from .bean_exceptions import *
 from .config import Config
 from .singleton import Singleton
 from .filter import *
-import threading
 import logging
 
 class SuiteCRM(metaclass=Singleton):
@@ -42,7 +41,6 @@ class SuiteCRM(metaclass=Singleton):
     """
 
     conf = Config()
-    _lock = threading.Lock()
     _logger = logging.getLogger('bPortal')
 
 
