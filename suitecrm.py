@@ -464,7 +464,7 @@ class SuiteCRM(metaclass=Singleton):
         return response
 
     def set_relationship(
-        self, module_name, module_id, related_names, related_ids, delete=False
+        self, module_name, module_id, related_names, related_ids, link_field_name, delete=False
     ):
         """
         Creates a relationship between 2 records.
@@ -478,19 +478,22 @@ class SuiteCRM(metaclass=Singleton):
         """
         if delete:
             return self._delete_relationship(
-                module_name, module_id, related_names, related_ids
+                module_name, module_id, related_names, related_ids, link_field_name
             )
         return self._create_relationship(
-            module_name, module_id, related_names, related_ids
+            module_name, module_id, related_names, related_ids, link_field_name
         )
 
     def _create_relationship(
-        self, module_name, module_id, related_module_name, related_ids
+        self, module_name, module_id, related_module_name, related_ids, link_field_name
     ):
 
         # Post
         response = []
-        url = f'/{module_name}/{module_id}/relationships'
+        if link_field_name:
+            url = f'/{module_name}/{module_id}/relationships/{link_field_name}'
+        else:
+            url = f'/{module_name}/{module_id}/relationships'
         for related_id in related_ids:
             data = {'type': related_module_name, 'id': related_id}
             response.append(
@@ -499,11 +502,11 @@ class SuiteCRM(metaclass=Singleton):
         return response
 
     def _delete_relationship(
-        self, module_name, module_id, related_module_names, related_ids
+        self, module_name, module_id, related_module_names, related_ids, link_field_name
     ):
         response = []
-        for related_module_name, related_id in zip(related_module_names, related_ids):
-            url = f'/{module_name}/{module_id}/relationships/{related_module_name.lower()}/{related_id}'
+        for related_module_names, related_id in zip(related_module_names, related_ids):
+            url = f'/{module_name}/{module_id}/relationships/{link_field_name}/{related_id}'
             response.append(
                 self._request(f'{self.conf.url}{self.MODULE_URL}{url}', 'delete')
             )
